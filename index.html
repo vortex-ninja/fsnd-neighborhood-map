@@ -18,7 +18,10 @@
 
           <!-- Filter field -->
 
-          <input class="form-control" type="text" placeholder="Filter..">
+          <input data-bind=" textInput: filterField,
+                             event: { keyup: filterList }"
+
+                 class="form-control" type="text" placeholder="Filter..">
 
           <hr>
           <p>List of locations</p>
@@ -29,23 +32,26 @@
               <ul data-bind="foreach: locations" class="list-group">
               
                 <li class="list-group-item list-group-item-action"
-                    data-bind="text: $data().title,
-                               click: $root.chooseLocation"></li>
+                    data-bind="text: title,
+                               visible: visible,
+                               click: $root.chooseLocation,
+                               css: { active: title==$root.chosenLocation().title }"></li>
               </ul>
             </div>
           </div>
           <div class="row">
             <div class="col-sm-12 border">
-              <ul data-bind="with: chosenLocation()">
+              <ul data-bind="with: chosenLocation">
                 <li data-bind="text: title"></li>
                 <li data-bind="text: location.lat"></li>
                 <li data-bind="text: location.lng"></li>
+                <li data-bind="text: visible"></li>
 
               </ul>
             </div>
           </div>
       </div>
-      <div class="col-sm-9 border">right</div>
+      <div data-bind="text: testField" class="col-sm-9 border">right</div>
 
 
     </div>
