@@ -1,16 +1,31 @@
+// Hardcoded initial locations
+
+
 const initialLocations = [
     {
         title: 'Żoliborska Szkoła Boksu',
-        location: {lat: 52.276894, lng: 20.984726},
+        location: { lat: 52.276894, lng: 20.984726 },
     },
     {
         title: 'Arena Wspinaczkowa Makak',
-        location: {lat: 52.297340, lng: 20.906519},
+        location: { lat: 52.297340, lng: 20.906519 },
     },
     {
         title: 'Szkoła Tańca SalsaLibre',
-        location: {lat: 52.261050, lng: 20.970574},
-    }
+        location: { lat: 52.261050, lng: 20.970574 },
+    },
+    {
+        title: 'Park Kępa Potocka',
+        location: { lat: 52.289618, lng: 20.979612 },
+    },
+    {
+        title: 'Park Sady Żoliborskie',
+        location: { lat: 52.267361, lng: 20.972407 },
+    },
+    {
+        title: 'Milk Bar "Sady"',
+        location: { lat: 52.264999, lng: 20.971255 },
+    },
 ];
 
 // Main viewmodel for the screen
@@ -32,7 +47,6 @@ function NeighborhoodMapViewModel() {
     }
 
     self.filterField = ko.observable('');
-
     self.testField = ko.observable('test123');
 
     // Current chosen location
@@ -62,6 +76,12 @@ function NeighborhoodMapViewModel() {
             self.locations[i](listElem);
         }
     };
+
+    // Map section
+
+
+
+
 }
 
 ko.applyBindings(new NeighborhoodMapViewModel());
