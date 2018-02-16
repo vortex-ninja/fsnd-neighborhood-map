@@ -11,21 +11,37 @@
     <title>Neighbourhood Map</title>
   </head>
   <body>
-    <div class="fluid-container">
-      <div class="row">
-        <div class="col-sm-3 border">
+  <div class="fluid-container">
+    <div class="row">
+      <div class="col-sm-3">
           <div class="row">
-            <div class="col-sm-12 border">list</div>
+            <div class="col-sm-12 border">
+              <ul data-bind="foreach: locations" class="list-group">
+              
+                <li class="list-group-item"
+                    data-bind="text: title,
+                               click: $root.chooseLocation,
+                               css: { active: title == $root.chosenLocation().title }"></li>
+              </ul>
+            </div>
           </div>
           <div class="row">
-            <div class="col-sm-12 border">div</div>
+            <div class="col-sm-12 border">
+              <ul data-bind="with: chosenLocation">
+                <li data-bind="text: title"></li>
+                <li data-bind="text: location.lat"></li>
+                <li data-bind="text: location.lng"></li>
+
+              </ul>
+            </div>
           </div>
-        </div>
-        <div class="col-sm-9 border">
-          Map
-        </div>
       </div>
+      <div class="col-sm-9 border">right</div>
+
+
     </div>
+
+  </div>
 
 
     <!-- Optional JavaScript -->
