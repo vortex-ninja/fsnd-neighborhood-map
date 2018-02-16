@@ -11,23 +11,32 @@
     <title>Neighbourhood Map</title>
   </head>
   <body>
-  <div class="fluid-container">
+  <div class="container">
     <div class="row">
       <div class="col-sm-3">
           <div class="row">
+
+          <!-- Filter field -->
+
+          <input class="form-control" type="text" placeholder="Filter..">
+
+          <hr>
+          <p>List of locations</p>
+
+
+          <!-- List of locations -->
             <div class="col-sm-12 border">
               <ul data-bind="foreach: locations" class="list-group">
               
-                <li class="list-group-item"
-                    data-bind="text: title,
-                               click: $root.chooseLocation,
-                               css: { active: title == $root.chosenLocation().title }"></li>
+                <li class="list-group-item list-group-item-action"
+                    data-bind="text: $data().title,
+                               click: $root.chooseLocation"></li>
               </ul>
             </div>
           </div>
           <div class="row">
             <div class="col-sm-12 border">
-              <ul data-bind="with: chosenLocation">
+              <ul data-bind="with: chosenLocation()">
                 <li data-bind="text: title"></li>
                 <li data-bind="text: location.lat"></li>
                 <li data-bind="text: location.lng"></li>

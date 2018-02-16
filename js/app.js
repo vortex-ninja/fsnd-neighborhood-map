@@ -1,15 +1,15 @@
-const locations = [
+const initialLocations = [
     {
         title: 'Żoliborska Szkoła Boksu',
-        location: {lat: 52.276894, lng: 20.984726}
+        location: {lat: 52.276894, lng: 20.984726},
     },
     {
         title: 'Arena Wspinaczkowa Makak',
-        location: {lat: 52.297340, lng: 20.906519}
+        location: {lat: 52.297340, lng: 20.906519},
     },
     {
         title: 'Szkoła Tańca SalsaLibre',
-        location: {lat: 52.261050, lng: 20.970574}
+        location: {lat: 52.261050, lng: 20.970574},
     }
 ];
 
@@ -19,15 +19,34 @@ function NeighborhoodMapViewModel() {
     // Data
 
     var self = this;
-    self.locations = locations;
-    self.chosenLocation = ko.observable();
+
+    // Create a list of locations as observables
+
+    self.locations = [];
+    for (i = 0; i < initialLocations.length; i++) {
+        var location = initialLocations[i];
+        location.visible = true;
+
+        var listLocation = ko.observable(location)
+        self.locations.push(ko.observable(listLocation));
+    }
+
+    // Current chosen location
+    self.chosenLocation = ko.observable(self.locations[0]());
+
 
     // Behaviours
+
+    // Change current location
     self.chooseLocation = function(location) {
-        self.chosenLocation(location);
-        console.log(location);
+        self.chosenLocation(location());
     }
-    self.chosenLocation(self.locations[0]);
+
+    // Filter function
+
+    function filterList() {
+
+    }
 }
 
 ko.applyBindings(new NeighborhoodMapViewModel());
