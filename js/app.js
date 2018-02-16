@@ -23,7 +23,7 @@ function NeighborhoodMapViewModel() {
     // Create a list of locations as observables
 
     self.locations = [];
-    for (i = 0; i < initialLocations.length; i++) {
+    for (let i = 0; i < initialLocations.length; i++) {
         var location = initialLocations[i];
         location.visible = true;
 
@@ -44,7 +44,7 @@ function NeighborhoodMapViewModel() {
     // Change current location
     self.chooseLocation = function(location) {
         self.chosenLocation(location);
-    }
+    };
 
     // Filter function
 
@@ -53,7 +53,7 @@ function NeighborhoodMapViewModel() {
 
         for (let i = 0; i < self.locations.length; i++) {
             let input = self.locations[i]().title.toUpperCase();
-            let listElem = self.locations[i]()
+            let listElem = self.locations[i]();
             if (input.indexOf(filter) > -1) {
                 listElem.visible = true;
             } else {
@@ -61,7 +61,7 @@ function NeighborhoodMapViewModel() {
             }
             self.locations[i](listElem);
         }
-    }
+    };
 }
 
 ko.applyBindings(new NeighborhoodMapViewModel());
