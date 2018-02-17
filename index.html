@@ -8,27 +8,29 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
+    <!-- My CSS -->
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
     <title>Neighbourhood Map</title>
   </head>
   <body>
+  <hr>
   <div class="container">
     <div class="row">
       <div class="col-sm-3">
-          
           <div class="row">
             <div class="col-sm-12">
             <!-- Filter field -->
 
             <input data-bind=" textInput: filterField,
-                               event: { keyup: filterList }"
+                               event: { keyup: filterChange }"
                    class="form-control" type="text" placeholder="Filter..">
             </div>
           </div>
 
           <hr>
-          
+
           <div class="row">
-          
 
           <!-- List of locations -->
             <div class="col-sm-12">
@@ -58,7 +60,7 @@
 
       <!-- Map div -->
 
-      <div data-bind="text: testField" class="col-sm-9">right</div>
+      <div class="col-sm-9"><div id="map"></div></div>
 
     </div>
 
@@ -73,6 +75,13 @@
 
     <!-- KnockoutJS -->
     <script type='text/javascript' src='js/libraries/knockout-3.4.2.js'></script>
+
+
+
+    <!-- Google maps API -->
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDP487xpHXelt9ZPamwn126zTx8P8hLRyw&callback=googleCallback" async defer>
+    </script>
 
     <!-- My javascript -->
     <script src="js/app.js"></script>

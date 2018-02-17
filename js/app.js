@@ -1,6 +1,7 @@
 // Hardcoded initial locations
 
 
+
 const initialLocations = [
     {
         title: 'Żoliborska Szkoła Boksu',
@@ -34,6 +35,7 @@ function NeighborhoodMapViewModel() {
     // Data
 
     var self = this;
+    self.markers = [];
 
     // Create a list of locations as observables
 
@@ -77,11 +79,78 @@ function NeighborhoodMapViewModel() {
         }
     };
 
+    // Functions to run when filterField changes
+
+    self.filterChange= function() {
+        self.filterList();
+        self.showMarkers();
+    }
+
     // Map section
 
+    // Initializes map
+
+    self.initMap = function() {
+        self.map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat: 52.267417, lng: 20.981296},
+            zoom: 12
+        });
+
+        self.createMarkers();
+
+    }
+
+    // MARKER FUNCTIONS
+
+    // Create marker
+
+    self.addMarker = function(data) {
+        let marker = new google.maps.Marker({
+            position: data.location,
+            title: data.title,
+            map: self.map,
+        });
+        return marker;
+    }
+
+    // Animate marker
+
+    self.animateMarker = function(marker) {
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+        setTimeout(function() { marker.setAnimation(null) }, 2000)
+    }
+
+    // Fill in marker's array
+
+    self.createMarkers = function() {
+        for (let i = 0; i < self.locations.length; i++) {
+            self.markers.push(self.addMarker(self.locations[i]()))
+        }
+    }
+
+    // Show visible markers
+
+    self.showMarkers = function() {
+        for (let i = 0; i < self.locations.length; i++) {
+            if (self.locations[i]().visible) {
+                self.markers[i].setMap(self.map);
+            } else {
+                self.markers[i].setMap(null);
+            }
+        }
+    }
+
+
+};
 
 
 
+VM = new NeighborhoodMapViewModel()
+
+ko.applyBindings(VM);
+
+
+
+function googleCallback() {
+    VM.initMap();
 }
-
-ko.applyBindings(new NeighborhoodMapViewModel());
