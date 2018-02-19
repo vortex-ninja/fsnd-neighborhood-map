@@ -43,6 +43,7 @@ function NeighborhoodMapViewModel() {
     for (let i = 0; i < initialLocations.length; i++) {
         var location = initialLocations[i];
         location.visible = true;
+        location.id = i;
 
         var listLocation = ko.observable(location);
         self.locations.push(listLocation);
@@ -52,14 +53,31 @@ function NeighborhoodMapViewModel() {
     self.testField = ko.observable('test123');
 
     // Current chosen location
-    self.chosenLocation = ko.observable(self.locations[0]());
+    self.chosenLocation = ko.observable(null);
 
 
     // Behaviours
 
-    // Change current location
+    // Set active location
+
+    self.setLocation = function(location) {
+        if (self.chosenLocation() === location) {
+            console.log('unset loc');
+            self.chooseLocation(null);
+            self.showMarkers()
+        } else {
+            console.log('set loc');
+            self.chooseLocation(location);
+            self.hideAllMarkers();
+            self.showMarker(self.markers[location.id]);
+        }
+    }
+
+
+    // Change current list location
     self.chooseLocation = function(location) {
         self.chosenLocation(location);
+        console.log(location);
     };
 
     // Filter function
@@ -104,13 +122,30 @@ function NeighborhoodMapViewModel() {
 
     // Create marker
 
-    self.addMarker = function(data) {
+    self.addMarker = function(data, id) {
         let marker = new google.maps.Marker({
             position: data.location,
             title: data.title,
             map: self.map,
+            id: id
         });
         return marker;
+    }
+
+    // Show marker
+
+    self.showMarker = function(marker) {
+        self.hideAllMarkers();
+        marker.setMap(self.map);
+        self.animateMarker(marker);
+    }
+
+    // Hide all markers
+
+    self.hideAllMarkers = function() {
+        for (let i = 0; i < self.markers.length; i++) {
+            self.markers[i].setMap(null);
+        }
     }
 
     // Animate marker
@@ -124,7 +159,7 @@ function NeighborhoodMapViewModel() {
 
     self.createMarkers = function() {
         for (let i = 0; i < self.locations.length; i++) {
-            self.markers.push(self.addMarker(self.locations[i]()))
+            self.markers.push(self.addMarker(self.locations[i](), i))
         }
     }
 
@@ -140,6 +175,7 @@ function NeighborhoodMapViewModel() {
         }
     }
 
+console.log(self.markers);
 
 };
 
