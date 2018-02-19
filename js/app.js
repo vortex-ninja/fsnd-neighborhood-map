@@ -60,16 +60,16 @@ function NeighborhoodMapViewModel() {
 
     // Set active location
 
-    self.setLocation = function(location) {
-        if (self.chosenLocation() === location) {
-            console.log('unset loc');
+    self.setLocation = function(locationOrMarker) {
+
+        let id = locationOrMarker.id;
+        if (self.chosenLocation() === self.locations[id]()) {
             self.chooseLocation(null);
             self.showMarkers()
         } else {
-            console.log('set loc');
-            self.chooseLocation(location);
+            self.chooseLocation(self.locations[id]());
             self.hideAllMarkers();
-            self.showMarker(self.markers[location.id]);
+            self.showMarker(self.markers[id]);
         }
     }
 
@@ -114,6 +114,8 @@ function NeighborhoodMapViewModel() {
             zoom: 12
         });
 
+
+
         self.createMarkers();
 
     }
@@ -129,6 +131,9 @@ function NeighborhoodMapViewModel() {
             map: self.map,
             id: id
         });
+        marker.addListener('click', function() {
+            self.setLocation(this);
+        })
         return marker;
     }
 
