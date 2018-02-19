@@ -37,6 +37,7 @@ function NeighborhoodMapViewModel() {
     var self = this;
     self.markers = [];
 
+
     // Create a list of locations as observables
 
     self.locations = [];
@@ -65,10 +66,19 @@ function NeighborhoodMapViewModel() {
         let id = locationOrMarker.id;
         if (self.chosenLocation() === self.locations[id]()) {
             self.chooseLocation(null);
+
+            self.infowindow.close()
             self.showMarkers()
         } else {
             self.chooseLocation(self.locations[id]());
             self.hideAllMarkers();
+
+            // Set content and open info window
+
+
+
+            self.infowindow.setContent(self.markers[id].title);
+            self.infowindow.open(self.map, self.markers[id]);
             self.showMarker(self.markers[id]);
         }
     }
@@ -113,6 +123,8 @@ function NeighborhoodMapViewModel() {
             center: {lat: 52.267417, lng: 20.981296},
             zoom: 12
         });
+
+        self.infowindow = new google.maps.InfoWindow();
 
 
 
