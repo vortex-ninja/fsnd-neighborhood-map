@@ -68,26 +68,24 @@ function NeighborhoodMapViewModel() {
             self.chooseLocation(null);
 
             self.infowindow.close()
-            self.showMarkers()
+
         } else {
             self.chooseLocation(self.locations[id]());
-            self.hideAllMarkers();
-
-            // Set content and open info window
 
 
 
+            self.animateMarker(self.markers[id]);
             self.infowindow.setContent(self.markers[id].title);
             self.infowindow.open(self.map, self.markers[id]);
-            self.showMarker(self.markers[id]);
         }
     }
+
+
 
 
     // Change current list location
     self.chooseLocation = function(location) {
         self.chosenLocation(location);
-        console.log(location);
     };
 
     // Filter function
@@ -191,8 +189,6 @@ function NeighborhoodMapViewModel() {
             }
         }
     }
-
-console.log(self.markers);
 
 };
 

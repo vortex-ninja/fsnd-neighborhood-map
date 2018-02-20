@@ -34,11 +34,12 @@
 
           <!-- List of locations -->
             <div class="col-sm-12">
-              <ul data-bind="foreach: locations" class="list-group">
+              <ul id="location-list" data-bind="foreach: locations" class="list-group">
                 <li class="list-group-item list-group-item-action"
                     data-bind="text: title,
                                visible: visible,
-                               click: $root.setLocation"></li>
+                               click: $root.setLocation,
+                               css: { active: $data == $root.chosenLocation() }"></li>
               </ul>
             </div>
           </div>
