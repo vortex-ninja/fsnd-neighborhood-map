@@ -1,6 +1,4 @@
-// Hardcoded initial locations
-
-
+// Model - hardcoded initial locations
 
 const initialLocations = [
     {
@@ -33,14 +31,10 @@ const initialLocations = [
 // Main viewmodel for the screen
 function NeighborhoodMapViewModel() {
 
-    // Data
+    // DATA
 
     var self = this;
     self.markers = [];
-
-    // self.yelpAPIKey = '2QxRon9mGBlOzy8S6V0PxkoQRo5N-qVFBWjf7ECmgyjqdm-7mOyGvVMq949ZXUCSrZ9d9Ui2fEWmIwjS55HXP2C7Xb3jMg4NWC9CBsDgqfazkCEd_0Kah0zT1GqNWnYx'
-
-
 
     // Create a list of locations as observables
 
@@ -54,31 +48,34 @@ function NeighborhoodMapViewModel() {
         self.locations.push(listLocation);
     }
 
-    self.filterField = ko.observable('');
-    self.testField = ko.observable('test123');
+    // KO observable fot value of the filterField
 
-    // Current chosen location
+    self.filterField = ko.observable('');
+
+    // KO observable for current chosen location
+
     self.chosenLocation = ko.observable(null);
 
 
-    // Behaviours
+    // BEHAVIOURS
 
     // Set active location
 
     self.setLocation = function(locationOrMarker) {
 
         let id = locationOrMarker.id;
+
         if (self.chosenLocation() === self.locations[id]()) {
             self.chooseLocation(null);
-
-
             self.infowindow.close()
 
         } else {
             self.chooseLocation(self.locations[id]());
 
+            // Temporary content for the info window while waiting for ajax response
 
             self.infowindow.setContent('Loading')
+
             self.animateMarker(self.markers[id]);
             self.populateInfowindow(self.locations[id]())
             self.infowindow.open(self.map, self.markers[id]);
@@ -88,10 +85,10 @@ function NeighborhoodMapViewModel() {
 
     // Populate info window
 
-
     self.populateInfowindow = function(location) {
 
         // Prepare AJAX request
+
         let baseUrl = 'https://api.foursquare.com/v2/venues/'
         let authInfo = '?client_id=JH0BOK53EGVERUOLWKVWE40BISUW4LHJPXJXED5GRKQATPUB&client_secret=VPLKEXZJ5TIACWS1OCM5J3MKU2YS35YWPMYNNY5QECMRDXXX&v=20180218'
         let fsID = location.fsID;
@@ -100,7 +97,6 @@ function NeighborhoodMapViewModel() {
 
         function ajaxVenue(xhttp, status) {
             let venue = JSON.parse(xhttp).response.venue;
-
 
             // Build content string for the info window
 
@@ -125,21 +121,17 @@ function NeighborhoodMapViewModel() {
                 }
             }
 
-
-
             self.infowindow.setContent(contentStr);
             console.log(venue);
         }
 
         // Execure AJAX request for venue info
-        self.ajaxRequest(url, ajaxVenue);
 
+        self.ajaxRequest(url, ajaxVenue);
     }
 
-
-
-
     // Change current list location
+
     self.chooseLocation = function(location) {
         self.chosenLocation(location);
     };
@@ -168,7 +160,7 @@ function NeighborhoodMapViewModel() {
         self.showMarkers();
     }
 
-    // Map section
+    // MAP SECTION
 
     // Initializes map
 
@@ -179,11 +171,7 @@ function NeighborhoodMapViewModel() {
         });
 
         self.infowindow = new google.maps.InfoWindow();
-
-
-
         self.createMarkers();
-
     }
 
     // MARKER FUNCTIONS
@@ -247,16 +235,16 @@ function NeighborhoodMapViewModel() {
     }
 
 
-    // AJAX API requests
+    // AJAX API REQUESTS
 
     // I know jQuery is already loaded and I could use to it to make ajax requests
     // but I wanted to see how it's done in vanilla js
 
     self.ajaxRequest = function(url, callback) {
+
         let xhttp = new XMLHttpRequest();
 
         xhttp.onreadystatechange = function() {
-
 
             if (this.readyState == 4) {
                 callback(this.responseText, this.status)
@@ -264,23 +252,12 @@ function NeighborhoodMapViewModel() {
         };
 
         xhttp.open('GET', url, true);
-
         xhttp.send();
-
     }
-
-
-
-
 };
 
-
-
 VM = new NeighborhoodMapViewModel()
-
 ko.applyBindings(VM);
-
-
 
 function googleCallback() {
     VM.initMap();
