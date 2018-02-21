@@ -5,27 +5,28 @@
 const initialLocations = [
     {
         title: 'Żoliborska Szkoła Boksu',
-        location: { lat: 52.276894, lng: 20.984726 },
+        location: { lat: 52.276426, lng: 20.986392 },
+        fsID: '560bfc15498e007382ba701f'
     },
     {
         title: 'Arena Wspinaczkowa Makak',
-        location: { lat: 52.297340, lng: 20.906519 },
-    },
-    {
-        title: 'Szkoła Tańca SalsaLibre',
-        location: { lat: 52.261050, lng: 20.970574 },
+        location: { lat: 52.297392, lng: 20.906519 },
+        fsID: '539d649f498e08a9ddc49efc'
     },
     {
         title: 'Park Kępa Potocka',
-        location: { lat: 52.289618, lng: 20.979612 },
+        location: { lat: 52.277089, lng: 20.991247 },
+        fsID: '4b8a6ae2f964a520fe6b32e3'
     },
     {
         title: 'Park Sady Żoliborskie',
         location: { lat: 52.267361, lng: 20.972407 },
+        fsID: '4bb87e27cf2fc9b644929f02'
     },
     {
         title: 'Milk Bar "Sady"',
         location: { lat: 52.264999, lng: 20.971255 },
+        fsID: '4c80be43309aef3bc718b781'
     },
 ];
 
@@ -36,6 +37,9 @@ function NeighborhoodMapViewModel() {
 
     var self = this;
     self.markers = [];
+
+    // self.yelpAPIKey = '2QxRon9mGBlOzy8S6V0PxkoQRo5N-qVFBWjf7ECmgyjqdm-7mOyGvVMq949ZXUCSrZ9d9Ui2fEWmIwjS55HXP2C7Xb3jMg4NWC9CBsDgqfazkCEd_0Kah0zT1GqNWnYx'
+
 
 
     // Create a list of locations as observables
@@ -67,17 +71,69 @@ function NeighborhoodMapViewModel() {
         if (self.chosenLocation() === self.locations[id]()) {
             self.chooseLocation(null);
 
+
             self.infowindow.close()
 
         } else {
             self.chooseLocation(self.locations[id]());
 
 
-
+            self.infowindow.setContent('Loading')
             self.animateMarker(self.markers[id]);
-            self.infowindow.setContent(self.markers[id].title);
+            self.populateInfowindow(self.locations[id]())
             self.infowindow.open(self.map, self.markers[id]);
         }
+    }
+
+
+    // Populate info window
+
+
+    self.populateInfowindow = function(location) {
+
+        // Prepare AJAX request
+        let baseUrl = 'https://api.foursquare.com/v2/venues/'
+        let authInfo = '?client_id=JH0BOK53EGVERUOLWKVWE40BISUW4LHJPXJXED5GRKQATPUB&client_secret=VPLKEXZJ5TIACWS1OCM5J3MKU2YS35YWPMYNNY5QECMRDXXX&v=20180218'
+        let fsID = location.fsID;
+
+        let url = baseUrl + fsID + authInfo;
+
+        function ajaxVenue(xhttp, status) {
+            let venue = JSON.parse(xhttp).response.venue;
+
+
+            // Build content string for the info window
+
+            let contentStr = '';
+
+            if (status !== 200) {
+                contentStr = "Error: couldn't load place's details.";
+            } else {
+
+                if (venue.name) {
+                    contentStr += '<div>name: ' + venue.name + '</div>'
+                }
+
+                if (venue.categories.length > 0) {
+                    if (venue.categories[0].name) {
+                        contentStr += '<div>category: ' + venue.categories[0].name + '</div>'
+                    }
+                }
+
+                if (venue.bestPhoto) {
+                    contentStr += '<img src="' + venue.bestPhoto.prefix + 'cap300' + venue.bestPhoto.suffix + '">';
+                }
+            }
+
+
+
+            self.infowindow.setContent(contentStr);
+            console.log(venue);
+        }
+
+        // Execure AJAX request for venue info
+        self.ajaxRequest(url, ajaxVenue);
+
     }
 
 
@@ -189,6 +245,32 @@ function NeighborhoodMapViewModel() {
             }
         }
     }
+
+
+    // AJAX API requests
+
+    // I know jQuery is already loaded and I could use to it to make ajax requests
+    // but I wanted to see how it's done in vanilla js
+
+    self.ajaxRequest = function(url, callback) {
+        let xhttp = new XMLHttpRequest();
+
+        xhttp.onreadystatechange = function() {
+
+
+            if (this.readyState == 4) {
+                callback(this.responseText, this.status)
+            }
+        };
+
+        xhttp.open('GET', url, true);
+
+        xhttp.send();
+
+    }
+
+
+
 
 };
 
