@@ -122,7 +122,7 @@ function NeighborhoodMapViewModel() {
             }
 
             self.infowindow.setContent(contentStr);
-            console.log(venue);
+
         }
 
         // Execure AJAX request for venue info
@@ -196,6 +196,9 @@ function NeighborhoodMapViewModel() {
     self.showMarker = function(marker) {
         self.hideAllMarkers();
         marker.setMap(self.map);
+        console.log(self.map.getCenter());
+        self.map.setCenter(marker.position);
+        console.log(self.map.getCenter());
         self.animateMarker(marker);
     }
 
@@ -210,6 +213,21 @@ function NeighborhoodMapViewModel() {
     // Animate marker
 
     self.animateMarker = function(marker) {
+
+        // Center on a marker leaving room for an infowindow
+
+        self.map.panTo(marker.position);
+
+        let ll = self.map.getBounds();
+        let ne = ll.getNorthEast();
+        let sw = ll.getSouthWest();
+
+        let centerPoint = { lat: sw.lat() + (ne.lat()-sw.lat()) * 0.75, lng: (ne.lng() + sw.lng()) / 2 }
+
+        self.map.panTo(centerPoint);
+
+        // Animate the marker
+
         marker.setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(function() { marker.setAnimation(null) }, 2000)
     }
