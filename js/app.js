@@ -64,20 +64,34 @@ function NeighborhoodMapViewModel() {
     self.setLocation = function(locationOrMarker) {
 
         let id = locationOrMarker.id;
+        let loc = self.locations[id]();
 
-        if (self.chosenLocation() === self.locations[id]()) {
+        if (self.chosenLocation() === loc) {
             self.chooseLocation(null);
             self.infowindow.close()
 
         } else {
-            self.chooseLocation(self.locations[id]());
+            self.chooseLocation(loc);
 
             // Temporary content for the info window while waiting for ajax response
 
             self.infowindow.setContent('Loading')
 
+            // Get info window content if there is none
+            // or content older than one day
+            // otherwise just render the info window
+
+            let day = 1000 * 60 * 60 * 24; // one day in miliseconds
+
+            if (!loc.fsData || (loc.fsData && (loc.fsData.dateRetrieved < (Date.now() - day))))    {
+                self.getDataInfoWindow(loc);
+            } else {
+                self.populateInfoWindow(loc);
+            }
+
+
+
             self.animateMarker(self.markers[id]);
-            self.populateInfowindow(self.locations[id]())
             self.infowindow.open(self.map, self.markers[id]);
         }
     }
@@ -85,7 +99,24 @@ function NeighborhoodMapViewModel() {
 
     // Populate info window
 
-    self.populateInfowindow = function(location) {
+    self.populateInfoWindow = function(location) {
+        let contentStr ='';
+        contentStr += '<div>' + location.title + '</div>';
+        if (location.fsData.category) {
+            contentStr += '<div>category: '+ location.fsData.category + '</div>';
+
+        }
+        if (location.fsData.bestPhoto) {
+            contentStr += '<img src="' + location.fsData.bestPhoto + '"/>';
+        }
+
+        self.infowindow.setContent(contentStr);
+    }
+
+
+    // Get data from Foursquare API
+
+    self.getDataInfoWindow = function(location) {
 
         // Prepare AJAX request
 
@@ -95,39 +126,44 @@ function NeighborhoodMapViewModel() {
 
         let url = baseUrl + fsID + authInfo;
 
-        function ajaxVenue(xhttp, status) {
+        function ajaxVenue(xhttp, status, location) {
             let venue = JSON.parse(xhttp).response.venue;
 
-            // Build content string for the info window
+            // Build fsData object with data from Foursquare API
 
-            let contentStr = '';
+            let fsData = {}
 
             if (status !== 200) {
-                contentStr = "Error: couldn't load place's details.";
+                fsData.error = "Error: couldn't load place's details.";
             } else {
 
                 if (venue.name) {
-                    contentStr += '<div>name: ' + venue.name + '</div>'
+                    fsData.name = venue.name
                 }
 
                 if (venue.categories.length > 0) {
                     if (venue.categories[0].name) {
-                        contentStr += '<div>category: ' + venue.categories[0].name + '</div>'
+                        fsData.category = venue.categories[0].name;
                     }
                 }
 
                 if (venue.bestPhoto) {
-                    contentStr += '<img src="' + venue.bestPhoto.prefix + 'cap300' + venue.bestPhoto.suffix + '">';
+                    fsData.bestPhoto = venue.bestPhoto.prefix + 'cap300' + venue.bestPhoto.suffix;
                 }
             }
 
-            self.infowindow.setContent(contentStr);
+            fsData.dateRetrieved = Date.now()
+
+            location.fsData = fsData;
+            self.locations[location.id](location);
+
+            self.populateInfoWindow(location);
 
         }
 
         // Execure AJAX request for venue info
 
-        self.ajaxRequest(url, ajaxVenue);
+        self.ajaxRequest(url, ajaxVenue, location);
     }
 
     // Change current list location
@@ -191,16 +227,16 @@ function NeighborhoodMapViewModel() {
         return marker;
     }
 
-    // Show marker
+    // Show marker - expandable?
 
-    self.showMarker = function(marker) {
-        self.hideAllMarkers();
-        marker.setMap(self.map);
-        console.log(self.map.getCenter());
-        self.map.setCenter(marker.position);
-        console.log(self.map.getCenter());
-        self.animateMarker(marker);
-    }
+    // self.showMarker = function(marker) {
+    //     self.hideAllMarkers();
+    //     marker.setMap(self.map);
+    //     console.log(self.map.getCenter());
+    //     self.map.setCenter(marker.position);
+    //     console.log(self.map.getCenter());
+    //     self.animateMarker(marker);
+    // }
 
     // Hide all markers
 
@@ -258,14 +294,14 @@ function NeighborhoodMapViewModel() {
     // I know jQuery is already loaded and I could use to it to make ajax requests
     // but I wanted to see how it's done in vanilla js
 
-    self.ajaxRequest = function(url, callback) {
+    self.ajaxRequest = function(url, callback, location) {
 
         let xhttp = new XMLHttpRequest();
 
         xhttp.onreadystatechange = function() {
 
             if (this.readyState == 4) {
-                callback(this.responseText, this.status)
+                callback(this.responseText, this.status, location)
             }
         };
 
