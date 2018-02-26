@@ -4,27 +4,22 @@ const initialLocations = [
     {
         title: 'Żoliborska Szkoła Boksu',
         location: { lat: 52.276426, lng: 20.986392 },
-        fsID: '560bfc15498e007382ba701f'
     },
     {
-        title: 'Arena Wspinaczkowa Makak',
+        title: 'Arena wspinaczkowa Makak',
         location: { lat: 52.297392, lng: 20.906519 },
-        fsID: '539d649f498e08a9ddc49efc'
     },
     {
         title: 'Park Kępa Potocka',
         location: { lat: 52.277089, lng: 20.991247 },
-        fsID: '4b8a6ae2f964a520fe6b32e3'
     },
     {
         title: 'Park Sady Żoliborskie',
         location: { lat: 52.267361, lng: 20.972407 },
-        fsID: '4bb87e27cf2fc9b644929f02'
     },
     {
-        title: 'Milk Bar "Sady"',
+        title: 'Bar Mleczny Sady',
         location: { lat: 52.264999, lng: 20.971255 },
-        fsID: '4c80be43309aef3bc718b781'
     },
 ];
 
@@ -48,7 +43,7 @@ function NeighborhoodMapViewModel() {
         self.locations.push(listLocation);
     }
 
-    // KO observable fot value of the filterField
+    // KO observable for value of the filterField
 
     self.filterField = ko.observable('');
 
@@ -102,12 +97,17 @@ function NeighborhoodMapViewModel() {
     self.populateInfoWindow = function(location) {
         let contentStr ='';
         contentStr += '<div>' + location.title + '</div>';
-        if (location.fsData.category) {
-            contentStr += '<div>category: '+ location.fsData.category + '</div>';
 
-        }
-        if (location.fsData.bestPhoto) {
-            contentStr += '<img src="' + location.fsData.bestPhoto + '"/>';
+        if (location.fsData.error) {
+            contentStr += '<div>' + fsData.error + '</div>';
+        } else {
+            if (location.fsData.category) {
+                contentStr += '<div>category: '+ location.fsData.category + '</div>';
+
+            }
+            if (location.fsData.bestPhoto) {
+                contentStr += '<img src="' + location.fsData.bestPhoto + '"/>';
+            }
         }
 
         self.infowindow.setContent(contentStr);
@@ -118,13 +118,47 @@ function NeighborhoodMapViewModel() {
 
     self.getDataInfoWindow = function(location) {
 
-        // Prepare AJAX request
+        // Prepare search request
 
-        let baseUrl = 'https://api.foursquare.com/v2/venues/'
+        let baseUrl = 'https://api.foursquare.com/v2/venues/search'
         let authInfo = '?client_id=JH0BOK53EGVERUOLWKVWE40BISUW4LHJPXJXED5GRKQATPUB&client_secret=VPLKEXZJ5TIACWS1OCM5J3MKU2YS35YWPMYNNY5QECMRDXXX&v=20180218'
-        let fsID = location.fsID;
+        let ll = '&ll=' + location.location.lat + ',' + location.location.lng;
 
-        let url = baseUrl + fsID + authInfo;
+        let url = baseUrl + authInfo + ll;
+
+        // Execute search request and get Foursquare ID
+
+        function ajaxSearch(xhttp, status, location) {
+            let search = JSON.parse(xhttp);
+            let fsID = '';
+
+            let venues;
+
+            if (search.response.venues.length > 0) {
+                venues = search.response.venues
+            }
+
+            console.log(venues);
+            for (let i = 0; i < venues.length; i++) {
+                if (location.title === venues[i].name) {
+                    location.fsID = venues[i].id;
+                }
+            }
+
+
+            // When search is done execute AJAX request for venue info
+            baseUrl = 'https://api.foursquare.com/v2/venues/'
+            authInfo = '?client_id=JH0BOK53EGVERUOLWKVWE40BISUW4LHJPXJXED5GRKQATPUB&client_secret=VPLKEXZJ5TIACWS1OCM5J3MKU2YS35YWPMYNNY5QECMRDXXX&v=20180218'
+            fsID = location.fsID;
+
+            url = baseUrl + fsID + authInfo;
+
+            self.ajaxRequest(url, ajaxVenue, location);
+
+        }
+
+
+        self.ajaxRequest(url, ajaxSearch, location);
 
         function ajaxVenue(xhttp, status, location) {
             let venue = JSON.parse(xhttp).response.venue;
@@ -161,9 +195,7 @@ function NeighborhoodMapViewModel() {
 
         }
 
-        // Execure AJAX request for venue info
 
-        self.ajaxRequest(url, ajaxVenue, location);
     }
 
     // Change current list location
@@ -227,16 +259,6 @@ function NeighborhoodMapViewModel() {
         return marker;
     }
 
-    // Show marker - expandable?
-
-    // self.showMarker = function(marker) {
-    //     self.hideAllMarkers();
-    //     marker.setMap(self.map);
-    //     console.log(self.map.getCenter());
-    //     self.map.setCenter(marker.position);
-    //     console.log(self.map.getCenter());
-    //     self.animateMarker(marker);
-    // }
 
     // Hide all markers
 
@@ -308,6 +330,12 @@ function NeighborhoodMapViewModel() {
         xhttp.open('GET', url, true);
         xhttp.send();
     }
+
+
+    self.searchRequest = function(url, callback, location) {
+
+    }
+
 };
 
 VM = new NeighborhoodMapViewModel()
