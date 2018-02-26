@@ -130,15 +130,7 @@ function NeighborhoodMapViewModel() {
 
     self.getDataInfoWindow = function(location) {
 
-        // Prepare search request
-
-        let baseUrl = 'https://api.foursquare.com/v2/venues/search'
-        let authInfo = '?client_id=JH0BOK53EGVERUOLWKVWE40BISUW4LHJPXJXED5GRKQATPUB&client_secret=VPLKEXZJ5TIACWS1OCM5J3MKU2YS35YWPMYNNY5QECMRDXXX&v=20180218'
-        let ll = '&ll=' + location.location.lat + ',' + location.location.lng;
-
-        let url = baseUrl + authInfo + ll;
-
-        // Execute search request and get Foursquare ID
+        // Callback functions
 
         function ajaxSearch(xhttp, status, location) {
             let search = JSON.parse(xhttp);
@@ -167,9 +159,6 @@ function NeighborhoodMapViewModel() {
             self.ajaxRequest(url, ajaxVenue, location);
 
         }
-
-
-        self.ajaxRequest(url, ajaxSearch, location);
 
         function ajaxVenue(xhttp, status, location) {
             let venue = JSON.parse(xhttp).response.venue;
@@ -201,12 +190,23 @@ function NeighborhoodMapViewModel() {
 
             location.fsData = fsData;
             self.locations[location.id](location);
-
             self.populateInfoWindow(location);
+
 
         }
 
 
+        // Prepare search request
+
+        let baseUrl = 'https://api.foursquare.com/v2/venues/search'
+        let authInfo = '?client_id=JH0BOK53EGVERUOLWKVWE40BISUW4LHJPXJXED5GRKQATPUB&client_secret=VPLKEXZJ5TIACWS1OCM5J3MKU2YS35YWPMYNNY5QECMRDXXX&v=20180218'
+        let ll = '&ll=' + location.location.lat + ',' + location.location.lng;
+
+        let url = baseUrl + authInfo + ll;
+
+        // Execute search request and get Foursquare ID
+
+        self.ajaxRequest(url, ajaxSearch, location);
     }
 
     // Change current list location
@@ -249,7 +249,21 @@ function NeighborhoodMapViewModel() {
             zoom: 12
         });
 
-        self.infowindow = new google.maps.InfoWindow();
+        self.infowindow = new google.maps.InfoWindow({
+            // disableAutoPan: true
+        });
+
+
+        // A workaround to use the autopan functionality everytime info window content changes
+        // so that infowindow is always fully visible
+
+        function centerOnMarker() {
+            self.infowindow.close();
+            self.infowindow.open(self.map, self.markers[self.chosenLocation().id]);
+            console.log(self.chosenLocation().location)
+        }
+        self.infowindow.addListener('content_changed', centerOnMarker)
+
         self.createMarkers();
     }
 
@@ -285,15 +299,9 @@ function NeighborhoodMapViewModel() {
 
         // Center on a marker leaving room for an infowindow
 
-        self.map.panTo(marker.position);
 
-        let ll = self.map.getBounds();
-        let ne = ll.getNorthEast();
-        let sw = ll.getSouthWest();
+        
 
-        let centerPoint = { lat: sw.lat() + (ne.lat()-sw.lat()) * 0.75, lng: (ne.lng() + sw.lng()) / 2 }
-
-        self.map.panTo(centerPoint);
 
         // Animate the marker
 
