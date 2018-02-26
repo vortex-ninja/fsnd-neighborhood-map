@@ -21,6 +21,18 @@ const initialLocations = [
         title: 'Bar Mleczny Sady',
         location: { lat: 52.264999, lng: 20.971255 },
     },
+    {
+        title: 'Buenos Nachos',
+        location: { lat: 52.270794, lng: 20.950631 },
+    },
+    {
+        title: 'Burgerownia',
+        location: { lat: 52.266171, lng: 20.974487 },
+    },
+    {
+        title: 'Smaki Warszawy',
+        location: { lat: 52.267704, lng: 20.984851 },
+    },
 ];
 
 // Main viewmodel for the screen
@@ -138,7 +150,6 @@ function NeighborhoodMapViewModel() {
                 venues = search.response.venues
             }
 
-            console.log(venues);
             for (let i = 0; i < venues.length; i++) {
                 if (location.title === venues[i].name) {
                     location.fsID = venues[i].id;
