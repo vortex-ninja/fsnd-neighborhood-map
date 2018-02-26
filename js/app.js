@@ -249,10 +249,9 @@ function NeighborhoodMapViewModel() {
             zoom: 12
         });
 
-        self.infowindow = new google.maps.InfoWindow({
-            // disableAutoPan: true
-        });
+        // Create a global info window, only one will be open at any given time
 
+        self.infowindow = new google.maps.InfoWindow();
 
         // A workaround to use the autopan functionality everytime info window content changes
         // so that infowindow is always fully visible
@@ -260,11 +259,15 @@ function NeighborhoodMapViewModel() {
         function centerOnMarker() {
             self.infowindow.close();
             self.infowindow.open(self.map, self.markers[self.chosenLocation().id]);
-            console.log(self.chosenLocation().location)
         }
         self.infowindow.addListener('content_changed', centerOnMarker)
 
+        // Set up bounds and markers for the map
+
+        self.bounds = new google.maps.LatLngBounds();
         self.createMarkers();
+
+        self.map.fitBounds(self.bounds);
     }
 
     // MARKER FUNCTIONS
@@ -297,23 +300,19 @@ function NeighborhoodMapViewModel() {
 
     self.animateMarker = function(marker) {
 
-        // Center on a marker leaving room for an infowindow
-
-
-        
-
-
-        // Animate the marker
-
         marker.setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(function() { marker.setAnimation(null) }, 2000)
     }
 
-    // Fill in marker's array
+    // Fill in marker's array and set bounds
 
     self.createMarkers = function() {
         for (let i = 0; i < self.locations.length; i++) {
             self.markers.push(self.addMarker(self.locations[i](), i))
+
+            // Set bounds for the map
+            self.bounds.extend(self.locations[i]().location);
+
         }
     }
 
