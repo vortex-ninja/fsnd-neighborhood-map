@@ -36,6 +36,7 @@ const initialLocations = [
 ];
 
 // Main viewmodel for the screen
+
 function NeighborhoodMapViewModel() {
 
     // DATA
@@ -106,11 +107,11 @@ function NeighborhoodMapViewModel() {
 
     self.populateInfoWindow = function(location) {
 
-        let contentStr ='';
+        let contentStr = '';
         contentStr += '<div>' + location.title + '</div>';
 
         if (location.fsData.error) {
-            contentStr += '<div>' + fsData.error + '</div>';
+            contentStr += '<div>' + location.fsData.error + '</div>';
         } else {
             if (location.fsData.category) {
                 contentStr += '<div>category: '+ location.fsData.category + '</div>';
@@ -122,6 +123,7 @@ function NeighborhoodMapViewModel() {
         }
 
         self.infowindow.setContent(contentStr);
+        self.infowindow.open(self.map, self.markers[location.id])
     }
 
 
@@ -143,19 +145,19 @@ function NeighborhoodMapViewModel() {
 
             for (let i = 0; i < venues.length; i++) {
                 if (location.title === venues[i].name) {
-                    location.fsID = venues[i].id;
+                    fsID = venues[i].id;
                 }
             }
-
 
             // When search is done execute AJAX request for venue info
             baseUrl = 'https://api.foursquare.com/v2/venues/'
             authInfo = '?client_id=JH0BOK53EGVERUOLWKVWE40BISUW4LHJPXJXED5GRKQATPUB&client_secret=VPLKEXZJ5TIACWS1OCM5J3MKU2YS35YWPMYNNY5QECMRDXXX&v=20180218'
-            fsID = location.fsID;
 
+
+            location.fsID = fsID;
             url = baseUrl + fsID + authInfo;
-
             self.ajaxRequest(url, ajaxVenue, location);
+
 
         }
 
@@ -190,10 +192,7 @@ function NeighborhoodMapViewModel() {
             location.fsData = fsData;
             self.locations[location.id](location);
             self.populateInfoWindow(location);
-
-
         }
-
 
         // Prepare search request
 
@@ -247,8 +246,7 @@ function NeighborhoodMapViewModel() {
 
     self.initMap = function() {
         self.map = new google.maps.Map(document.getElementById('map'), {
-            center: {lat: 52.267417, lng: 20.981296},
-            zoom: 12
+            center: {lat: 52.267417, lng: 20.981296}
         });
 
         // Create a global info window, only one will be open at any given time
@@ -262,7 +260,7 @@ function NeighborhoodMapViewModel() {
             self.infowindow.close();
             self.infowindow.open(self.map, self.markers[self.chosenLocation().id]);
         }
-        self.infowindow.addListener('content_changed', centerOnMarker)
+        // self.infowindow.addListener('content_changed', centerOnMarker)
 
         // Set up bounds and markers for the map
 
@@ -286,13 +284,12 @@ function NeighborhoodMapViewModel() {
              if ((self.bounds.getNorthEast().lat() === self.bounds.getSouthWest().lat()) &&
                 (self.bounds.getNorthEast().lng() === self.bounds.getSouthWest().lng())) {
                 self.map.panTo(self.bounds.getCenter());
-            console.log('sheeeet');
              } else {
                 self.map.fitBounds(self.bounds);
             }
 
         } else {
-            self.map.panTo(self.chosenLocation().location);
+            self.map.setCenter(self.chosenLocation().location);
             self.infowindow.close();
             self.infowindow.open(self.map, self.markers[self.chosenLocation().id])
         }
@@ -353,7 +350,7 @@ function NeighborhoodMapViewModel() {
 
     self.animateMarker = function(marker) {
 
-        self.map.panTo(marker.position);
+        self.map.setCenter(marker.position);
 
         marker.setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(function() { marker.setAnimation(null) }, 2000)
