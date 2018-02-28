@@ -33,6 +33,14 @@ const initialLocations = [
         title: 'Smaki Warszawy',
         location: { lat: 52.267704, lng: 20.984851 },
     },
+    {
+        title: 'Kino Wisła',
+        location: { lat: 52.269683, lng: 20.986667 }
+    },
+    {
+        title: 'Legia - Sekcja Bokserska',
+        location: { lat: 52.257571, lng: 20.946168 }
+    }
 ];
 
 // Main viewmodel for the screen
@@ -76,14 +84,14 @@ function NeighborhoodMapViewModel() {
 
         if (self.chosenLocation() === loc) {
             self.chooseLocation(null);
-            self.infowindow.close()
+            self.infowindow.close();
 
         } else {
             self.chooseLocation(loc);
 
             // Temporary content for the info window while waiting for ajax response
 
-            self.infowindow.setContent('Loading')
+            self.infowindow.setContent('Loading');
 
             // Get info window content if there is none
             // or content older than one day
@@ -100,7 +108,7 @@ function NeighborhoodMapViewModel() {
             self.animateMarker(self.markers[id]);
             self.infowindow.open(self.map, self.markers[id]);
         }
-    }
+    };
 
 
     // Populate info window
@@ -123,8 +131,8 @@ function NeighborhoodMapViewModel() {
         }
 
         self.infowindow.setContent(contentStr);
-        self.infowindow.open(self.map, self.markers[location.id])
-    }
+        self.infowindow.open(self.map, self.markers[location.id]);
+    };
 
 
     // Get data from Foursquare API
@@ -140,7 +148,7 @@ function NeighborhoodMapViewModel() {
             let venues;
 
             if (search.response.venues.length > 0) {
-                venues = search.response.venues
+                venues = search.response.venues;
             }
 
             for (let i = 0; i < venues.length; i++) {
@@ -150,8 +158,8 @@ function NeighborhoodMapViewModel() {
             }
 
             // When search is done execute AJAX request for venue info
-            baseUrl = 'https://api.foursquare.com/v2/venues/'
-            authInfo = '?client_id=JH0BOK53EGVERUOLWKVWE40BISUW4LHJPXJXED5GRKQATPUB&client_secret=VPLKEXZJ5TIACWS1OCM5J3MKU2YS35YWPMYNNY5QECMRDXXX&v=20180218'
+            baseUrl = 'https://api.foursquare.com/v2/venues/';
+            authInfo = '?client_id=JH0BOK53EGVERUOLWKVWE40BISUW4LHJPXJXED5GRKQATPUB&client_secret=VPLKEXZJ5TIACWS1OCM5J3MKU2YS35YWPMYNNY5QECMRDXXX&v=20180218';
 
 
             location.fsID = fsID;
@@ -166,14 +174,14 @@ function NeighborhoodMapViewModel() {
 
             // Build fsData object with data from Foursquare API
 
-            let fsData = {}
+            let fsData = {};
 
             if (status !== 200) {
                 fsData.error = "Error: couldn't load place's details.";
             } else {
 
                 if (venue.name) {
-                    fsData.name = venue.name
+                    fsData.name = venue.name;
                 }
 
                 if (venue.categories.length > 0) {
@@ -187,7 +195,7 @@ function NeighborhoodMapViewModel() {
                 }
             }
 
-            fsData.dateRetrieved = Date.now()
+            fsData.dateRetrieved = Date.now();
 
             location.fsData = fsData;
             self.locations[location.id](location);
@@ -196,8 +204,8 @@ function NeighborhoodMapViewModel() {
 
         // Prepare search request
 
-        let baseUrl = 'https://api.foursquare.com/v2/venues/search'
-        let authInfo = '?client_id=JH0BOK53EGVERUOLWKVWE40BISUW4LHJPXJXED5GRKQATPUB&client_secret=VPLKEXZJ5TIACWS1OCM5J3MKU2YS35YWPMYNNY5QECMRDXXX&v=20180218'
+        let baseUrl = 'https://api.foursquare.com/v2/venues/search';
+        let authInfo = '?client_id=JH0BOK53EGVERUOLWKVWE40BISUW4LHJPXJXED5GRKQATPUB&client_secret=VPLKEXZJ5TIACWS1OCM5J3MKU2YS35YWPMYNNY5QECMRDXXX&v=20180218';
         let ll = '&ll=' + location.location.lat + ',' + location.location.lng;
 
         let url = baseUrl + authInfo + ll;
@@ -205,7 +213,7 @@ function NeighborhoodMapViewModel() {
         // Execute search request and get Foursquare ID
 
         self.ajaxRequest(url, ajaxSearch, location);
-    }
+    };
 
     // Change current list location
 
@@ -238,7 +246,7 @@ function NeighborhoodMapViewModel() {
     self.filterChange= function() {
         self.filterList();
         self.showMarkers();
-    }
+    };
 
     // MAP SECTION
 
@@ -253,22 +261,13 @@ function NeighborhoodMapViewModel() {
 
         self.infowindow = new google.maps.InfoWindow();
 
-        // A workaround to use the autopan functionality everytime info window content changes
-        // so that infowindow is always fully visible
-
-        function centerOnMarker() {
-            self.infowindow.close();
-            self.infowindow.open(self.map, self.markers[self.chosenLocation().id]);
-        }
-        // self.infowindow.addListener('content_changed', centerOnMarker)
-
         // Set up bounds and markers for the map
 
         self.getMapBounds();
         self.createMarkers();
 
         self.map.fitBounds(self.bounds);
-    }
+    };
 
     // Center map
     // If there's a location chosen this function centers map on this location
@@ -291,9 +290,9 @@ function NeighborhoodMapViewModel() {
         } else {
             self.map.setCenter(self.chosenLocation().location);
             self.infowindow.close();
-            self.infowindow.open(self.map, self.markers[self.chosenLocation().id])
+            self.infowindow.open(self.map, self.markers[self.chosenLocation().id]);
         }
-    }
+    };
 
     // Reset map
 
@@ -304,7 +303,7 @@ function NeighborhoodMapViewModel() {
         self.filterField('');
         self.filterChange();
         self.centerMap();
-    }
+    };
 
     // Get bounds for visible markers
 
@@ -318,7 +317,7 @@ function NeighborhoodMapViewModel() {
                     self.bounds.extend(loc.location);
                 }
             }
-    }
+    };
 
     // MARKER FUNCTIONS
 
@@ -333,9 +332,9 @@ function NeighborhoodMapViewModel() {
         });
         marker.addListener('click', function() {
             self.setLocation(this);
-        })
+        });
         return marker;
-    }
+    };
 
 
     // Hide all markers
@@ -344,7 +343,7 @@ function NeighborhoodMapViewModel() {
         for (let i = 0; i < self.markers.length; i++) {
             self.markers[i].setMap(null);
         }
-    }
+    };
 
     // Animate marker
 
@@ -353,19 +352,16 @@ function NeighborhoodMapViewModel() {
         self.map.setCenter(marker.position);
 
         marker.setAnimation(google.maps.Animation.BOUNCE);
-        setTimeout(function() { marker.setAnimation(null) }, 2000)
-    }
+        setTimeout(function() { marker.setAnimation(null) }, 2000);
+    };
 
     // Fill in marker's array and set bounds
 
     self.createMarkers = function() {
         for (let i = 0; i < self.locations.length; i++) {
-            self.markers.push(self.addMarker(self.locations[i](), i))
-
-
-
+            self.markers.push(self.addMarker(self.locations[i](), i));
         }
-    }
+    };
 
     // Show visible markers
 
@@ -377,7 +373,7 @@ function NeighborhoodMapViewModel() {
                 self.markers[i].setMap(null);
             }
         }
-    }
+    };
 
 
     // AJAX API REQUESTS
@@ -392,22 +388,17 @@ function NeighborhoodMapViewModel() {
         xhttp.onreadystatechange = function() {
 
             if (this.readyState == 4) {
-                callback(this.responseText, this.status, location)
+                callback(this.responseText, this.status, location);
             }
         };
 
         xhttp.open('GET', url, true);
         xhttp.send();
-    }
+    };
 
+}
 
-    self.searchRequest = function(url, callback, location) {
-
-    }
-
-};
-
-VM = new NeighborhoodMapViewModel()
+VM = new NeighborhoodMapViewModel();
 ko.applyBindings(VM);
 
 function googleCallback() {
