@@ -96,8 +96,6 @@ function NeighborhoodMapViewModel() {
                 self.populateInfoWindow(loc);
             }
 
-
-
             self.animateMarker(self.markers[id]);
             self.infowindow.open(self.map, self.markers[id]);
         }
@@ -107,6 +105,7 @@ function NeighborhoodMapViewModel() {
     // Populate info window
 
     self.populateInfoWindow = function(location) {
+
         let contentStr ='';
         contentStr += '<div>' + location.title + '</div>';
 
@@ -220,6 +219,8 @@ function NeighborhoodMapViewModel() {
     self.filterList = function() {
         let filter = self.filterField().toUpperCase();
 
+        self.chosenLocation(null);
+
         for (let i = 0; i < self.locations.length; i++) {
             let input = self.locations[i]().title.toUpperCase();
             let listElem = self.locations[i]();
@@ -230,6 +231,7 @@ function NeighborhoodMapViewModel() {
             }
             self.locations[i](listElem);
         }
+
     };
 
     // Functions to run when filterField changes
@@ -264,10 +266,61 @@ function NeighborhoodMapViewModel() {
 
         // Set up bounds and markers for the map
 
-        self.bounds = new google.maps.LatLngBounds();
+        self.getMapBounds();
         self.createMarkers();
 
         self.map.fitBounds(self.bounds);
+    }
+
+    // Center map
+    // If there's a location chosen this function centers map on this location
+    // otherwise it centers on all the markers visible
+
+    self.centerMap = function() {
+
+        if (!self.chosenLocation()) {
+             self.getMapBounds();
+
+             // If there's only one location in bounds center on it
+
+             if ((self.bounds.getNorthEast().lat() === self.bounds.getSouthWest().lat()) &&
+                (self.bounds.getNorthEast().lng() === self.bounds.getSouthWest().lng())) {
+                self.map.panTo(self.bounds.getCenter());
+            console.log('sheeeet');
+             } else {
+                self.map.fitBounds(self.bounds);
+            }
+
+        } else {
+            self.map.panTo(self.chosenLocation().location);
+            self.infowindow.close();
+            self.infowindow.open(self.map, self.markers[self.chosenLocation().id])
+        }
+    }
+
+    // Reset map
+
+    self.resetMap = function() {
+
+        self.chosenLocation(null);
+        self.infowindow.close();
+        self.filterField('');
+        self.filterChange();
+        self.centerMap();
+    }
+
+    // Get bounds for visible markers
+
+    self.getMapBounds = function() {
+
+            self.bounds = new google.maps.LatLngBounds();
+
+            for (let i = 0; i < self.locations.length; i++) {
+                let loc = self.locations[i]();
+                if (loc.visible) {
+                    self.bounds.extend(loc.location);
+                }
+            }
     }
 
     // MARKER FUNCTIONS
@@ -300,6 +353,8 @@ function NeighborhoodMapViewModel() {
 
     self.animateMarker = function(marker) {
 
+        self.map.panTo(marker.position);
+
         marker.setAnimation(google.maps.Animation.BOUNCE);
         setTimeout(function() { marker.setAnimation(null) }, 2000)
     }
@@ -310,8 +365,7 @@ function NeighborhoodMapViewModel() {
         for (let i = 0; i < self.locations.length; i++) {
             self.markers.push(self.addMarker(self.locations[i](), i))
 
-            // Set bounds for the map
-            self.bounds.extend(self.locations[i]().location);
+
 
         }
     }
