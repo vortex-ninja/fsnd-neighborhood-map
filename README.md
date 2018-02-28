@@ -19,3 +19,6 @@ Either clone this repo and run `index.html` with your browser of choice or visit
 * ###### Reset button:
     removes filter and shows all locations on the map.
     
+### Attribution
+
+I use Google Maps APIs and Foursquare API in my app.
