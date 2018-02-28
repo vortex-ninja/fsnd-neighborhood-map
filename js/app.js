@@ -352,7 +352,7 @@ function NeighborhoodMapViewModel() {
         self.map.setCenter(marker.position);
 
         marker.setAnimation(google.maps.Animation.BOUNCE);
-        setTimeout(function() { marker.setAnimation(null) }, 2000);
+        setTimeout(function() { marker.setAnimation(null); }, 2000);
     };
 
     // Fill in marker's array and set bounds
