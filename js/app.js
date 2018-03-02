@@ -59,6 +59,7 @@ function NeighborhoodMapViewModel() {
         var location = initialLocations[i];
         location.visible = true;
         location.id = i;
+        location.fsData = { id: ''};
 
         var listLocation = ko.observable(location);
         self.locations.push(listLocation);
@@ -99,7 +100,7 @@ function NeighborhoodMapViewModel() {
 
             let day = 1000 * 60 * 60 * 24; // one day in miliseconds
 
-            if (!loc.fsData || (loc.fsData && (loc.fsData.dateRetrieved < (Date.now() - day))))    {
+            if ((!loc.fsData.dateRetrieved) || (loc.fsData.dateRetrieved < (Date.now() - day)))    {
                 self.getDataInfoWindow(loc);
             } else {
                 self.populateInfoWindow(loc);
@@ -142,62 +143,62 @@ function NeighborhoodMapViewModel() {
         // Callback functions
 
         function ajaxSearch(xhttp, status, location) {
-            let search = JSON.parse(xhttp);
-            let fsID = '';
 
-            let venues;
+            if (status !== 200) {
+                self.ajaxError(location);
+            } else {
 
-            if (search.response.venues.length > 0) {
-                venues = search.response.venues;
-            }
+                let search = JSON.parse(xhttp);
+                let venues;
 
-            for (let i = 0; i < venues.length; i++) {
-                if (location.title === venues[i].name) {
-                    fsID = venues[i].id;
+                if (search.response.venues.length > 0) {
+                    venues = search.response.venues;
+                }
+
+                for (let i = 0; i < venues.length; i++) {
+                    if (location.title === venues[i].name) {
+                        location.fsData.id = venues[i].id;
+                    }
+                }
+
+                // When search is done and place's id is found execute AJAX request for venue info
+
+                if (location.fsData.id) {
+                    baseUrl = 'https://api.foursquare.com/v2/venues/';
+                    authInfo = '?client_id=JH0BOK53EGVERUOLWKVWE40BISUW4LHJPXJXED5GRKQATPUB&client_secret=VPLKEXZJ5TIACWS1OCM5J3MKU2YS35YWPMYNNY5QECMRDXXX&v=20180218';
+                    url = baseUrl + location.fsData.id + authInfo;
+                    self.ajaxRequest(url, ajaxVenue, location);
+                } else {
+                    self.ajaxError(location);
                 }
             }
-
-            // When search is done execute AJAX request for venue info
-            baseUrl = 'https://api.foursquare.com/v2/venues/';
-            authInfo = '?client_id=JH0BOK53EGVERUOLWKVWE40BISUW4LHJPXJXED5GRKQATPUB&client_secret=VPLKEXZJ5TIACWS1OCM5J3MKU2YS35YWPMYNNY5QECMRDXXX&v=20180218';
-
-
-            location.fsID = fsID;
-            url = baseUrl + fsID + authInfo;
-            self.ajaxRequest(url, ajaxVenue, location);
-
-
         }
 
         function ajaxVenue(xhttp, status, location) {
             let venue = JSON.parse(xhttp).response.venue;
 
-            // Build fsData object with data from Foursquare API
-
-            let fsData = {};
-
             if (status !== 200) {
-                fsData.error = "Error: couldn't load place's details.";
+                self.ajaxError(location);
             } else {
 
                 if (venue.name) {
-                    fsData.name = venue.name;
+                    location.fsData.name = venue.name;
                 }
 
                 if (venue.categories.length > 0) {
                     if (venue.categories[0].name) {
-                        fsData.category = venue.categories[0].name;
+                        location.fsData.category = venue.categories[0].name;
                     }
                 }
 
                 if (venue.bestPhoto) {
-                    fsData.bestPhoto = venue.bestPhoto.prefix + 'cap300' + venue.bestPhoto.suffix;
+                    location.fsData.bestPhoto = venue.bestPhoto.prefix + 'cap300' + venue.bestPhoto.suffix;
                 }
             }
 
-            fsData.dateRetrieved = Date.now();
+            location.fsData.dateRetrieved = Date.now();
 
-            location.fsData = fsData;
+
             self.locations[location.id](location);
             self.populateInfoWindow(location);
         }
@@ -385,17 +386,24 @@ function NeighborhoodMapViewModel() {
 
         let xhttp = new XMLHttpRequest();
 
-        xhttp.onreadystatechange = function() {
+        xhttp.onload = function() {
+            callback(this.responseText, this.status, location);
+        };
 
-            if (this.readyState == 4) {
-                callback(this.responseText, this.status, location);
-            }
+        xhttp.onerror = function(error) {
+            console.log(error);
+            self.ajaxError(location);
         };
 
         xhttp.open('GET', url, true);
         xhttp.send();
     };
 
+    self.ajaxError = function(location) {
+
+        location.fsData.error = "Error: couldn't load place's details."
+        self.populateInfoWindow(location);
+    }
 }
 
 VM = new NeighborhoodMapViewModel();
