@@ -229,6 +229,9 @@ function NeighborhoodMapViewModel() {
 
     // Filter function
 
+    // I used this example to create my function
+    // https://www.w3schools.com/howto/howto_js_filter_lists.asp
+
     self.filterList = function() {
         let filter = self.filterField().toUpperCase();
 
@@ -422,4 +425,8 @@ function googleCallbackError() {
 
 function googleCallback() {
     VM.initMap();
+}
+
+function googleError() {
+    window.alert('Map failed to load. Site will not work properly.');
 }
