@@ -409,24 +409,14 @@ function NeighborhoodMapViewModel() {
 
     self.ajaxError = function(location) {
 
-        location.fsData.error = "Error: couldn't load place's details."
+        location.fsData.error = "Error: couldn't load place's details.";
         self.populateInfoWindow(location);
-    }
+    };
 }
 
 VM = new NeighborhoodMapViewModel();
 ko.applyBindings(VM);
 
-
-function googleCallbackError() {
-    console.log('error');
-}
-
-
 function googleCallback() {
     VM.initMap();
-}
-
-function googleError() {
-    window.alert('Map failed to load. Site will not work properly.');
 }
