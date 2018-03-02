@@ -73,6 +73,11 @@ function NeighborhoodMapViewModel() {
 
     self.chosenLocation = ko.observable(null);
 
+    // KO observable for google callback error
+
+    self.googleError = ko.observable('');
+
+
 
     // BEHAVIOURS
 
@@ -408,6 +413,12 @@ function NeighborhoodMapViewModel() {
 
 VM = new NeighborhoodMapViewModel();
 ko.applyBindings(VM);
+
+
+function googleCallbackError() {
+    console.log('error');
+}
+
 
 function googleCallback() {
     VM.initMap();
